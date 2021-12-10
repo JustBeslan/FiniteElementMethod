@@ -12,6 +12,7 @@ if __name__ == '__main__':
         mu=0.15,
         lambda_=1.2,
         s=1,
+        cond_left=0,
         cond_right_deriv=0.12
     )
     task2.execute()

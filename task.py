@@ -51,14 +51,14 @@ class Task:
 
     def get_b(self, x):
         k0, k1, k2 = self.get_coefficients(x)
-        part1 = (-6 * k2 + 3 * k1 * self.delta_x + 2 * k0 * self.delta_x**2) / (6 * self.delta_x)
-        part2 = (-6 * k2 - 3 * k1 * self.delta_x + 2 * k0 * self.delta_x**2) / (6 * self.delta_x)
+        b1 = (-6 * k2 + 3 * k1 * self.delta_x + 2 * k0 * self.delta_x**2) / (6 * self.delta_x)
+        b2 = (-6 * k2 - 3 * k1 * self.delta_x + 2 * k0 * self.delta_x**2) / (6 * self.delta_x)
         if x == 0:
-            return part1
+            return b1
         elif x == self.b:
-            return part2
+            return b2
         else:
-            return part1 + part2
+            return b1 + b2
 
     def get_a(self, x):
         k0, k1, k2 = self.get_coefficients(x)
@@ -68,56 +68,56 @@ class Task:
 
         D = np.zeros((self.N,))
 
-        # M = np.zeros((self.N, self.N))
-        # for i in range(M.shape[0]):
-        #     M[i][i] = self.get_b(i * self.delta_x)
-        #     if i != 0:
-        #         M[i][i - 1] = self.get_a(i * self.delta_x)
-        #     if i != M.shape[1] - 1:
-        #         M[i][i + 1] = self.get_c(i * self.delta_x)
-        #
-        # if self.cond_left_deriv is not None:
-        #     D[0] = self.cond_left_deriv
-        #
-        # if self.cond_right_deriv is not None:
-        #     D[-1] = self.cond_right_deriv
-        #
-        # if self.cond_right is not None:
-        #     D[-1] = self.cond_right
-        #     M[-1][-1] = 1
-        #     M[-1][-2] = 0
-        #
-        # if self.cond_left is not None:
-        #     D[0] = self.cond_left
-        #     M[0][0] = 1
-        #     M[0][1] = 0
-        #
-        # self.answer = np.linalg.solve(M, D)
-
-        A = [self.get_a(i * self.delta_x) for i in range(1, self.N)]
-        B = [self.get_b(i * self.delta_x) for i in range(self.N)]
-        C = [self.get_c(i * self.delta_x) for i in range(self.N - 1)]
+        M = np.zeros((self.N, self.N))
+        for i in range(M.shape[0]):
+            M[i][i] = self.get_b(i * self.delta_x)
+            if i != 0:
+                M[i][i - 1] = self.get_b(i * self.delta_x)
+            if i != M.shape[1] - 1:
+                M[i][i + 1] = self.get_a(i * self.delta_x)
 
         if self.cond_left_deriv is not None:
             D[0] = self.cond_left_deriv
 
         if self.cond_right_deriv is not None:
-            D[-1] = self.cond_right_deriv
+            D[-1] = (self.cond_right_deriv * self.sigma2**2) / 2
 
         if self.cond_right is not None:
             D[-1] = self.cond_right
-            B[-1] = 1
-            A[-1] = 0
+            M[-1][-1] = 1
+            M[-1][-2] = 0
 
         if self.cond_left is not None:
             D[0] = self.cond_left
-            B[0] = 1
-            C[0] = 0
+            M[0][0] = 1
+            M[0][1] = 0
 
-        progonka = Progonka()
-        progonka.configure(A, B, C, D)
-        progonka.execute()
-        self.answer = progonka.answer
+        self.answer = np.linalg.solve(M, D)
+
+        # A = [self.get_a(i * self.delta_x) for i in range(1, self.N)]
+        # B = [self.get_b(i * self.delta_x) for i in range(self.N)]
+        # C = [self.get_c(i * self.delta_x) for i in range(self.N - 1)]
+        #
+        # if self.cond_left_deriv is not None:
+        #     D[0] = self.cond_left_deriv
+        #
+        # if self.cond_right_deriv is not None:
+        #     D[-1] = (self.cond_right_deriv * self.sigma2**2) / 2
+        #
+        # if self.cond_right is not None:
+        #     D[-1] = self.cond_right
+        #     B[-1] = 1
+        #     A[-1] = 0
+        #
+        # if self.cond_left is not None:
+        #     D[0] = self.cond_left
+        #     B[0] = 1
+        #     C[0] = 0
+        #
+        # progonka = Progonka()
+        # progonka.configure(A, B, C, D)
+        # progonka.execute()
+        # self.answer = progonka.answer
 
     def write_file(self, filename):
         with open(filename, 'w') as file:
@@ -130,4 +130,5 @@ class Task:
         import pylab
         pylab.figure(1)
         pylab.plot(X, abs(self.answer))
+        pylab.grid()
         pylab.show()
