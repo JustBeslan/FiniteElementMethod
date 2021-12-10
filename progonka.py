@@ -19,7 +19,7 @@ class Progonka:
         self.answer = np.array([0j for _ in range(self.sizeSystem)])
 
     def execute(self):
-        alfa_array, betta_array, gamma_array = self.get_coefficients()
+        alfa_array, betta_array = self.get_coefficients()
         for i in range(len(self.answer) - 1, -1, -1):
             if i == self.sizeSystem - 1:
                 self.answer[i] = betta_array[i]
@@ -42,4 +42,4 @@ class Progonka:
                 gamma_array.append(self.B[i] + self.A[i] * alfa_array[i - 1])
                 alfa_array.append(-self.C[i]/gamma_array[i])
                 betta_array.append((self.D[i] - self.A[i] * betta_array[i - 1]) / gamma_array[i])
-        return alfa_array, betta_array, gamma_array
+        return alfa_array, betta_array
